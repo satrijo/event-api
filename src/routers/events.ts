@@ -1,7 +1,7 @@
 import { Hono } from "hono";
-import prisma from "../prisma.js";
+import prisma from "../utils/prisma.js";
 import { zValidator } from "@hono/zod-validator";
-import { eventSchema } from "../validation.js";
+import { eventSchema } from "../validations/eventSchema.js";
 
 export const eventRoute = new Hono()
   .get("/", async (c) => {

@@ -1,6 +1,7 @@
 ```
-npm install
-npm run dev
+pnpm install
+pnpm rebuild
+pnpm run dev
 ```
 
 ```
