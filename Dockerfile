@@ -10,6 +10,9 @@ RUN pnpm rebuild
 RUN pnpm prisma generate
 RUN pnpm build
 
+# Give ownership of /app to node user before switching
+RUN chown -R node:node /app
+
 USER node
 EXPOSE 3000
 CMD ["node", "dist/src/index.js"]
