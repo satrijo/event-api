@@ -12,9 +12,21 @@ export const eventRoute = new Hono()
   })
   .get("/:id", async (c) => {
     const id = c.req.param("id");
-    const event = await prisma.event.findUnique({
-      where: { id },
-      include: { participants: true },
+    const event = await prisma.event.findFirst({
+      where: { id: String(id) },
+      include: {
+        participants: {
+          select: {
+            participant: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
     });
     return c.json({ event });
   })
