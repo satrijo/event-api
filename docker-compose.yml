@@ -1,0 +1,20 @@
+services:
+  event-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: event-api
+    environment:
+      - DATABASE_URL=file:./prisma/dev.db
+    ports:
+      - "3000"
+    volumes:  
+      - ./prisma/dev.db:/app/prisma/dev.db
+    command: sh -c "pnpm prisma migrate deploy && node dist/src/index.js"
+    networks:
+      - integrate
+    
+networks:
+  integrate:
+    external: true
+    

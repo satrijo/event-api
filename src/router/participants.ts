@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import prisma from "../utils/prisma.js";
 import { zValidator } from "@hono/zod-validator";
-import { participantSchema } from "../validations/participantSchema.js";
+import { participantSchema } from "../validations/participant-schema.js";
 
 export const participantRoute = new Hono()
   .get("/", async (c) => {
@@ -18,6 +18,14 @@ export const participantRoute = new Hono()
   })
   .post("/", zValidator("json", participantSchema), async (c) => {
     const { name, email, eventId } = await c.req.json();
+
+    const event = await prisma.event.findUnique({
+      where: { id: String(eventId) },
+    });
+
+    if (!event) {
+      return c.json({ message: "Event not found" }, 404);
+    }
 
     const newParticipant = await prisma.participant.create({
       data: {
@@ -42,8 +50,12 @@ export const participantRoute = new Hono()
   })
   .delete("/:id", async (c) => {
     const id = c.req.param("id");
-    await prisma.participant.delete({
-      where: { id: String(id) },
-    });
-    return c.json({ message: "Participant deleted successfully" });
+    try {
+      await prisma.participant.delete({
+        where: { id: String(id) },
+      });
+      return c.json({ message: "Participant deleted successfully" });
+    } catch (error) {
+      return c.json({ message: "Participant not found" }, 404);
+    }
   });

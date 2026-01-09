@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import prisma from "../utils/prisma.js";
 import { zValidator } from "@hono/zod-validator";
-import { eventSchema } from "../validations/eventSchema.js";
+import { eventSchema } from "../validations/event-schema.js";
 
 export const eventRoute = new Hono()
   .get("/", async (c) => {
@@ -32,17 +32,19 @@ export const eventRoute = new Hono()
   })
   .patch("/:id", async (c) => {
     const id = c.req.param("id");
-    const { title, description, location, date } = await c.req.json();
-    const updatedEvent = await prisma.event.update({
-      where: { id },
-      data: {
-        title,
-        description,
-        location,
-        date: new Date(date),
-      },
-    });
-    return c.json({ event: updatedEvent });
+    const body = await c.req.json();
+    try {
+      const updatedEvent = await prisma.event.update({
+        where: { id },
+        data: {
+          ...body,
+          date: body.date ? new Date(body.date) : undefined,
+        },
+      });
+      return c.json({ event: updatedEvent });
+    } catch (error) {
+      return c.json({ message: "Event not found" }, 404);
+    }
   })
   .delete("/:id", async (c) => {
     const id = c.req.param("id");
